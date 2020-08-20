@@ -396,6 +396,9 @@ are not maintained by the `tokio` project. These include:
 - [`test-env-log`] takes care of initializing `tracing` for tests, based on
   environment variables with an `env_logger` compatible syntax.
 - [`tracing-unwrap`] provides convenience methods to report failed unwraps on `Result` or `Option` types to a `Subscriber`.
+- [`wgpu-subscriber`] provides wgpu with a default logger and has layers for Chrome's trace format and a different stdout/err logger.
+
+
 
 (if you're the maintainer of a `tracing` ecosystem crate not in this list,
 please let us know!)
@@ -417,6 +420,7 @@ please let us know!)
 [`spandoc`]: https://docs.rs/spandoc
 [`tracing-wasm`]: https://docs.rs/tracing-wasm
 [`test-env-log`]: https://crates.io/crates/test-env-log
+[`wgpu-subscriber`]: https://docs.rs/wgpu-subscriber/0.1.0/wgpu_subscriber/
 [User Timing API (`window.performance`)]: https://developer.mozilla.org/en-US/docs/Web/API/User_Timing_API
 [`tracing-unwrap`]: https://docs.rs/tracing-unwrap
 
