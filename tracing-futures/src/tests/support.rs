@@ -1,7 +1,7 @@
 // this is the only way to make the path attribute play nice with `in
 // crate::support`...
 #[allow(clippy::module_inception)]
-#[path = "../../tracing/tests/support/mod.rs"]
+#[path = "../../../tracing/tests/support/mod.rs"]
 mod support;
 use std::{
     future::Future,
@@ -23,7 +23,7 @@ where
     E: Unpin,
 {
     type Output = Result<T, E>;
-    fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = self.get_mut();
 
         this.polls += 1;
