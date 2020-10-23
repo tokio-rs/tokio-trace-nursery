@@ -94,7 +94,7 @@ where
     }
 
     #[inline]
-    fn on_event(&self, event: &Event<'_>, ctx: subscribe::Context<'_, C>) {
+    fn on_event(&self, event: &Event<'_, '_>, ctx: subscribe::Context<'_, C>) {
         try_lock!(self.inner.read()).on_event(event, ctx)
     }
 

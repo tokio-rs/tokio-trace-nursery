@@ -89,7 +89,7 @@
 //!         id
 //!     }
 //!
-//!     fn event(&self, event: &Event<'_>) {
+//!     fn event(&self, event: &Event<'_, '_>) {
 //!         let json = json!({
 //!            "event": event.as_serde(),
 //!         });
@@ -263,8 +263,8 @@ impl<'a> Serialize for SerializeMetadata<'a> {
         S: Serializer,
     {
         let mut state = serializer.serialize_struct("Metadata", 9)?;
-        state.serialize_field("name", self.0.name())?;
-        state.serialize_field("target", self.0.target())?;
+        state.serialize_field("name", &self.0.name())?;
+        state.serialize_field("target", &self.0.target())?;
         state.serialize_field("level", &SerializeLevel(self.0.level()))?;
         state.serialize_field("module_path", &self.0.module_path())?;
         state.serialize_field("file", &self.0.file())?;
@@ -278,9 +278,9 @@ impl<'a> Serialize for SerializeMetadata<'a> {
 
 /// Implements `serde::Serialize` to write `Event` data to a serializer.
 #[derive(Debug)]
-pub struct SerializeEvent<'a>(&'a Event<'a>);
+pub struct SerializeEvent<'a, 'b>(&'a Event<'a, 'b>);
 
-impl<'a> Serialize for SerializeEvent<'a> {
+impl<'a> Serialize for SerializeEvent<'a, '_> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -481,8 +481,8 @@ impl<'a> AsSerde<'a> for tracing_core::Metadata<'a> {
     }
 }
 
-impl<'a> AsSerde<'a> for tracing_core::Event<'a> {
-    type Serializable = SerializeEvent<'a>;
+impl<'a, 'b> AsSerde<'a> for tracing_core::Event<'a, 'b> {
+    type Serializable = SerializeEvent<'a, 'b>;
 
     fn as_serde(&'a self) -> Self::Serializable {
         SerializeEvent(self)
@@ -521,7 +521,7 @@ impl<'a> AsSerde<'a> for Level {
     }
 }
 
-impl<'a> self::sealed::Sealed for Event<'a> {}
+impl<'a> self::sealed::Sealed for Event<'a, '_> {}
 
 impl<'a> self::sealed::Sealed for Attributes<'a> {}
 

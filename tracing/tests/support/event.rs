@@ -69,7 +69,7 @@ impl MockEvent {
 
     pub fn with_explicit_parent(self, parent: Option<&str>) -> MockEvent {
         let parent = match parent {
-            Some(name) => Parent::Explicit(name.into()),
+            Some(name) => Parent::Explicit(name.to_string()),
             None => Parent::ExplicitRoot,
         };
         Self {
@@ -78,7 +78,7 @@ impl MockEvent {
         }
     }
 
-    pub(in crate::support) fn check(&mut self, event: &tracing::Event<'_>) {
+    pub(in crate::support) fn check(&mut self, event: &tracing::Event<'_, '_>) {
         let meta = event.metadata();
         let name = meta.name();
         self.metadata

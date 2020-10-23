@@ -15,7 +15,7 @@ impl tracing::Collect for EnabledSubscriber {
         Id::from_u64(0xDEAD_FACE)
     }
 
-    fn event(&self, event: &Event<'_>) {
+    fn event(&self, event: &Event<'_, '_>) {
         let _ = event;
     }
 

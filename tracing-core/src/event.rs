@@ -20,16 +20,16 @@ use crate::{field, Metadata};
 /// [span]: ../span
 /// [fields]: ../field
 #[derive(Debug)]
-pub struct Event<'a> {
+pub struct Event<'a, 'b> {
     fields: &'a field::ValueSet<'a>,
-    metadata: &'static Metadata<'static>,
+    metadata: &'a Metadata<'b>,
     parent: Parent,
 }
 
-impl<'a> Event<'a> {
+impl<'a, 'b: 'a> Event<'a, 'b> {
     /// Constructs a new `Event` with the specified metadata and set of values,
     /// and observes it with the current collector.
-    pub fn dispatch(metadata: &'static Metadata<'static>, fields: &'a field::ValueSet<'_>) {
+    pub fn dispatch(metadata: &'a Metadata<'_>, fields: &'a field::ValueSet<'_>) {
         let event = Event::new(metadata, fields);
         crate::dispatch::get_default(|current| {
             current.event(&event);
@@ -39,7 +39,7 @@ impl<'a> Event<'a> {
     /// Returns a new `Event` in the current span, with the specified metadata
     /// and set of values.
     #[inline]
-    pub fn new(metadata: &'static Metadata<'static>, fields: &'a field::ValueSet<'a>) -> Self {
+    pub fn new(metadata: &'a Metadata<'b>, fields: &'a field::ValueSet<'a>) -> Self {
         Event {
             metadata,
             fields,
@@ -52,7 +52,7 @@ impl<'a> Event<'a> {
     #[inline]
     pub fn new_child_of(
         parent: impl Into<Option<Id>>,
-        metadata: &'static Metadata<'static>,
+        metadata: &'a Metadata<'b>,
         fields: &'a field::ValueSet<'a>,
     ) -> Self {
         let parent = match parent.into() {
@@ -70,7 +70,7 @@ impl<'a> Event<'a> {
     /// and observes it with the current collector and an explicit parent.
     pub fn child_of(
         parent: impl Into<Option<Id>>,
-        metadata: &'static Metadata<'static>,
+        metadata: &'a Metadata<'b>,
         fields: &'a field::ValueSet<'_>,
     ) {
         let event = Self::new_child_of(parent, metadata, fields);
@@ -95,8 +95,8 @@ impl<'a> Event<'a> {
     /// Returns [metadata] describing this `Event`.
     ///
     /// [metadata]: super::Metadata
-    pub fn metadata(&self) -> &'static Metadata<'static> {
-        self.metadata
+    pub fn metadata(&'a self) -> &'a Metadata<'_> {
+        &self.metadata
     }
 
     /// Returns true if the new event should be a root.

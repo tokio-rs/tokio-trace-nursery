@@ -299,7 +299,7 @@ pub trait Collect: 'static {
     /// [visitor]: super::field::Visit
     /// [`record` method]: super::event::Event::record
     /// [`dispatch` method]: super::event::Event::dispatch
-    fn event(&self, event: &Event<'_>);
+    fn event<'a>(&'a self, event: &'a Event<'a, '_>);
 
     /// Records that a span has been entered.
     ///

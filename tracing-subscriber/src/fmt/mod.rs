@@ -321,7 +321,8 @@ where
     }
 
     #[inline]
-    fn event(&self, event: &Event<'_>) {
+    // fn event<'a>(&'a self, event: &'a Event<'a>) {
+    fn event(&self, event: &Event<'_, '_>) {
         self.inner.event(event);
     }
 

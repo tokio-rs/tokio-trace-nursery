@@ -89,7 +89,7 @@ impl Collect for CounterCollector {
         values.record(&mut self.visitor())
     }
 
-    fn event(&self, event: &Event<'_>) {
+    fn event(&self, event: &Event<'_, '_>) {
         event.record(&mut self.visitor())
     }
 

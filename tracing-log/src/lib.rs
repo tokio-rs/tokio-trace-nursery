@@ -192,11 +192,11 @@ pub fn format_trace(record: &log::Record<'_>) -> io::Result<()> {
 
 /// Trait implemented for `tracing` types that can be converted to a `log`
 /// equivalent.
-pub trait AsLog: crate::sealed::Sealed {
+pub trait AsLog<'a>: crate::sealed::Sealed {
     /// The `log` type that this type can be converted into.
     type Log;
     /// Returns the `log` equivalent of `self`.
-    fn as_log(&self) -> Self::Log;
+    fn as_log(&'a self) -> Self::Log;
 }
 
 /// Trait implemented for `log` types that can be converted to a `tracing`
@@ -210,12 +210,12 @@ pub trait AsTrace: crate::sealed::Sealed {
 
 impl<'a> crate::sealed::Sealed for Metadata<'a> {}
 
-impl<'a> AsLog for Metadata<'a> {
+impl<'a> AsLog<'a> for Metadata<'a> {
     type Log = log::Metadata<'a>;
-    fn as_log(&self) -> Self::Log {
+    fn as_log(&'a self) -> Self::Log {
         log::Metadata::builder()
             .level(self.level().as_log())
-            .target(self.target())
+            .target(&self.target())
             .build()
     }
 }
@@ -335,7 +335,7 @@ impl<'a> AsTrace for log::Record<'a> {
 
 impl crate::sealed::Sealed for tracing_core::Level {}
 
-impl AsLog for tracing_core::Level {
+impl<'a> AsLog<'a> for tracing_core::Level {
     type Log = log::Level;
     fn as_log(&self) -> log::Level {
         match *self {
@@ -390,12 +390,12 @@ pub trait NormalizeEvent<'a>: crate::sealed::Sealed {
     /// Returns `None` is the `Event` is not issued from a `log`.
     fn normalized_metadata(&'a self) -> Option<Metadata<'a>>;
     /// Returns whether this `Event` represents a log (from the `log` crate)
-    fn is_log(&self) -> bool;
+    fn is_log(&'a self) -> bool;
 }
 
-impl<'a> crate::sealed::Sealed for Event<'a> {}
+impl<'a> crate::sealed::Sealed for Event<'a, '_> {}
 
-impl<'a> NormalizeEvent<'a> for Event<'a> {
+impl<'a> NormalizeEvent<'a> for Event<'a, '_> {
     fn normalized_metadata(&'a self) -> Option<Metadata<'a>> {
         let original = self.metadata();
         if self.is_log() {
@@ -417,7 +417,7 @@ impl<'a> NormalizeEvent<'a> for Event<'a> {
         }
     }
 
-    fn is_log(&self) -> bool {
+    fn is_log(&'a self) -> bool {
         self.metadata().callsite() == identify_callsite!(level_to_cs(*self.metadata().level()).0)
     }
 }
@@ -434,7 +434,7 @@ impl<'a> LogVisitor<'a> {
     // We don't actually _use_ the provided event argument; it is simply to
     // ensure that the `LogVisitor` does not outlive the event whose fields it
     // is visiting, so that the reference casts in `record_str` are safe.
-    fn new_for(_event: &'a Event<'a>, fields: &'static Fields) -> Self {
+    fn new_for(_event: &'a Event<'a, '_>, fields: &'static Fields) -> Self {
         Self {
             target: None,
             module_path: None,

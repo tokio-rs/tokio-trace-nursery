@@ -170,7 +170,7 @@ where
             // that the fields are not supposed to be missing.
             Err(e) => serializer.serialize_entry("field_error", &format!("{}", e))?,
         };
-        serializer.serialize_entry("name", self.0.metadata().name())?;
+        serializer.serialize_entry("name", &self.0.metadata().name())?;
         serializer.end()
     }
 }
@@ -185,7 +185,7 @@ where
         &self,
         ctx: &FmtContext<'_, S, N>,
         writer: &mut dyn fmt::Write,
-        event: &Event<'_>,
+        event: &Event<'_, '_>,
     ) -> fmt::Result
     where
         S: Collect + for<'a> LookupSpan<'a>,

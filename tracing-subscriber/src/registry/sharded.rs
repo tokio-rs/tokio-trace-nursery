@@ -211,7 +211,7 @@ impl Collect for Registry {
 
     /// This is intentionally not implemented, as recording events
     /// is the responsibility of layers atop of this registry.
-    fn event(&self, _: &Event<'_>) {}
+    fn event(&self, _: &Event<'_, '_>) {}
 
     fn enter(&self, id: &span::Id) {
         if self
@@ -497,8 +497,8 @@ mod tests {
 
     #[derive(Default)]
     struct CloseState {
-        open: HashMap<&'static str, Weak<()>>,
-        closed: Vec<(&'static str, Weak<()>)>,
+        open: HashMap<String, Weak<()>>,
+        closed: Vec<(String, Weak<()>)>,
     }
 
     struct SetRemoved(Arc<()>);
@@ -513,7 +513,7 @@ mod tests {
             let is_removed = Arc::new(());
             assert!(
                 lock.open
-                    .insert(span.name(), Arc::downgrade(&is_removed))
+                    .insert(span.name().to_string(), Arc::downgrade(&is_removed))
                     .is_none(),
                 "test layer saw multiple spans with the same name, the test is probably messed up"
             );
@@ -536,7 +536,7 @@ mod tests {
             if let Ok(mut lock) = self.inner.lock() {
                 if let Some(is_removed) = lock.open.remove(name) {
                     assert!(is_removed.upgrade().is_some());
-                    lock.closed.push((name, is_removed));
+                    lock.closed.push((name.to_string(), is_removed));
                 }
             }
         }
@@ -629,14 +629,14 @@ mod tests {
         }
 
         #[allow(unused)] // may want this for future tests
-        fn assert_last_closed(&self, span: Option<&str>) {
+        fn assert_last_closed(&self, span: Option<String>) {
             let lock = self.state.lock().unwrap();
             let last = lock.closed.last().map(|(span, _)| span);
             assert_eq!(
                 last,
                 span.as_ref(),
                 "expected {:?} to have closed last",
-                span
+                span.as_ref()
             );
         }
 
@@ -645,8 +645,8 @@ mod tests {
             let order = order.as_ref();
             for (i, name) in order.iter().enumerate() {
                 assert_eq!(
-                    lock.closed.get(i).map(|(span, _)| span),
-                    Some(name),
+                    lock.closed.get(i).map(|(span, _)| span.as_ref()),
+                    Some(*name),
                     "expected close order: {:?}, actual: {:?}",
                     order,
                     lock.closed.iter().map(|(name, _)| name).collect::<Vec<_>>()

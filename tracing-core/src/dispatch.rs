@@ -666,7 +666,7 @@ impl Dispatch {
     /// [`Collect`]: super::collect::Collect
     /// [`event`]: super::collect::Collect::event
     #[inline]
-    pub fn event(&self, event: &Event<'_>) {
+    pub fn event<'a>(&'a self, event: &'a Event<'a, '_>) {
         self.collector().event(event)
     }
 
@@ -829,7 +829,7 @@ impl Collect for NoCollector {
         span::Id::from_u64(0xDEAD)
     }
 
-    fn event(&self, _event: &Event<'_>) {}
+    fn event(&self, _event: &Event<'_, '_>) {}
 
     fn record(&self, _span: &span::Id, _values: &span::Record<'_>) {}
 
@@ -993,7 +993,7 @@ mod test {
 
             fn record_follows_from(&self, _: &span::Id, _: &span::Id) {}
 
-            fn event(&self, _: &Event<'_>) {
+            fn event(&self, _: &Event<'_, '_>) {
                 static EVENTS: AtomicUsize = AtomicUsize::new(0);
                 assert_eq!(
                     EVENTS.fetch_add(1, Ordering::Relaxed),
@@ -1049,7 +1049,7 @@ mod test {
 
             fn record_follows_from(&self, _: &span::Id, _: &span::Id) {}
 
-            fn event(&self, _: &Event<'_>) {}
+            fn event(&self, _: &Event<'_, '_>) {}
 
             fn enter(&self, _: &span::Id) {}
 
@@ -1082,7 +1082,7 @@ mod test {
 
             fn record_follows_from(&self, _: &span::Id, _: &span::Id) {}
 
-            fn event(&self, _: &Event<'_>) {}
+            fn event(&self, _: &Event<'_, '_>) {}
 
             fn enter(&self, _: &span::Id) {}
 
