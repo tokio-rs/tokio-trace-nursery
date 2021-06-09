@@ -424,6 +424,49 @@ impl<S, T, W> Subscriber<S, format::JsonFields, format::Format<format::Json, T>,
             ..self
         }
     }
+
+    /// Sets whether or not the formatter will merge events' parent spans fields
+    /// into the `fields` of this event
+    ///
+    /// See [`format::Json`]
+    pub fn merge_parent_fields(
+        self,
+        merge_parent_fields: bool,
+    ) -> Subscriber<S, format::JsonFields, format::Format<format::Json, T>, W> {
+        Subscriber {
+            fmt_event: self.fmt_event.merge_parent_fields(merge_parent_fields),
+            fmt_fields: format::JsonFields::new(),
+            ..self
+        }
+    }
+
+    /// Sets whether or not the formatter will namespace merged events' parent
+    /// spans fields into the `fields` of this event
+    ///
+    /// <div class="information">
+    ///     <div class="tooltip ignore" style="">ⓘ<span class="tooltiptext">Note</span></div>
+    /// </div>
+    /// <div class="example-wrap" style="display:inline-block">
+    /// <pre class="ignore" style="white-space:normal;font:inherit;">
+    /// <strong>Note</strong>: If this is set to `false`, the user is responsible for
+    /// ensuring there are no duplicated field names in the tree of parent spans. This
+    /// option does not ensure fields are unique in the resulting JSON. Most JSON parsers
+    /// do not handle duplicate fields well.
+    /// </pre></div>
+    ///
+    /// See [`format::Json`]
+    pub fn namespace_parent_fields(
+        self,
+        namespace_parent_fields: bool,
+    ) -> Subscriber<S, format::JsonFields, format::Format<format::Json, T>, W> {
+        Subscriber {
+            fmt_event: self
+                .fmt_event
+                .namespace_parent_fields(namespace_parent_fields),
+            fmt_fields: format::JsonFields::new(),
+            ..self
+        }
+    }
 }
 
 impl<S, N, E, W> Subscriber<S, N, E, W> {
